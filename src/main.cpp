@@ -1,5 +1,6 @@
 #include "core/input.cpp"
 #include "core/logger.cpp"
+#include "core/file_io.cpp"
 #include "renderer/renderer.cpp"
 
 int main()

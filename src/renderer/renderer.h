@@ -7,6 +7,9 @@ class Renderer
 {
   private:
     unsigned int VBO;
+    unsigned int VAO;
+    unsigned int shader_program;
+
   public:
     void init(GLFWwindow *);
     void render();
