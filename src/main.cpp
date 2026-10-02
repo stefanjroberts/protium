@@ -1,6 +1,5 @@
 #include "core/input.cpp"
 #include "core/logger.cpp"
-#include "core/logger.h"
 #include "renderer/renderer.cpp"
 
 int main()
@@ -32,17 +31,21 @@ int main()
 
     while (running == true)
     {
-        glfwSwapBuffers(window);
+
         glfwPollEvents();
         if (glfwWindowShouldClose(window))
         {
             running = false;
         }
+
         input_handler->process_input();
         if (input_handler->input.w)
         {
             PROTIUM_INFO("W");
         }
+
+        renderer->render();
+        glfwSwapBuffers(window);
     }
 
     glfwTerminate();

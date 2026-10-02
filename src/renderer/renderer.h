@@ -5,6 +5,9 @@
 
 class Renderer
 {
+  private:
+    unsigned int VBO;
   public:
     void init(GLFWwindow *);
+    void render();
 };
