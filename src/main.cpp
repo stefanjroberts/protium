@@ -1,27 +1,42 @@
-#include "logger.cpp"
-#include "opengl.cpp"
+#include "core/logger.h"
+#include "renderer/opengl.h"
 #include <GLFW/glfw3.h>
 
-int main() {
+int main()
+{
 
-  glfwInit();
-  // NOTE: Currently only supporting opengl for renderer backend
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwInit();
+    // NOTE: Currently only supporting opengl for renderer backend
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window =
-      glfwCreateWindow(1920, 1080, "Protium", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1920, 1080, "Protium", nullptr, nullptr);
 
-  if (window == nullptr) {
-    logger.error("Failed to create GLFW window");
-    glfwTerminate();
-  }
+    if (window == nullptr)
+    {
+        PROTIUM_ERROR("Failed to create GLFW window");
+        glfwTerminate();
+    }
 
-  glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window);
 
-  OGL_backend *renderer = new OGL_backend;
-  renderer->init();
+    Renderer *renderer = new Renderer;
+    renderer->init();
 
-  return 0;
+    PROTIUM_ERROR("error check");
+    PROTIUM_INFO("Main Loop");
+
+    bool running = true;
+
+    while (running == true)
+    {
+        glfwPollEvents();
+        if (glfwWindowShouldClose(window))
+        {
+            running = false;
+        }
+    }
+
+    return 0;
 }
