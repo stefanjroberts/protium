@@ -1,7 +1,7 @@
+#include "core/input.cpp"
+#include "core/logger.cpp"
 #include "core/logger.h"
-#include "core/window.h"
-#include "renderer/opengl.h"
-#include <GLFW/glfw3.h>
+#include "renderer/renderer.cpp"
 
 int main()
 {
@@ -23,6 +23,8 @@ int main()
 
     Renderer *renderer = new Renderer;
     renderer->init(window);
+    InputHandler *input_handler = new InputHandler;
+    input_handler->init(window);
 
     PROTIUM_INFO("Entering main Loop");
 
@@ -35,6 +37,11 @@ int main()
         if (glfwWindowShouldClose(window))
         {
             running = false;
+        }
+        input_handler->process_input();
+        if (input_handler->input.w)
+        {
+            PROTIUM_INFO("W");
         }
     }
 

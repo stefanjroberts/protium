@@ -1,5 +1,4 @@
-#include "opengl.h"
-#include <GLFW/glfw3.h>
+#include "renderer.h"
 
 // CALLBACK FUNCTIONS
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
