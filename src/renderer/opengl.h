@@ -6,5 +6,5 @@
 class Renderer
 {
   public:
-    void init();
+    void init(GLFWwindow *);
 };

@@ -1,10 +1,10 @@
 #include "core/logger.h"
+#include "core/window.h"
 #include "renderer/opengl.h"
 #include <GLFW/glfw3.h>
 
 int main()
 {
-
     glfwInit();
     // NOTE: Currently only supporting opengl for renderer backend
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -22,15 +22,15 @@ int main()
     glfwMakeContextCurrent(window);
 
     Renderer *renderer = new Renderer;
-    renderer->init();
+    renderer->init(window);
 
-    PROTIUM_ERROR("error check");
-    PROTIUM_INFO("Main Loop");
+    PROTIUM_INFO("Entering main Loop");
 
     bool running = true;
 
     while (running == true)
     {
+        glfwSwapBuffers(window);
         glfwPollEvents();
         if (glfwWindowShouldClose(window))
         {
@@ -38,5 +38,6 @@ int main()
         }
     }
 
+    glfwTerminate();
     return 0;
 }
