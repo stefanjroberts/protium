@@ -6,6 +6,7 @@
 class Renderer
 {
   private:
+    unsigned int EBO;
     unsigned int VBO;
     unsigned int VAO;
     unsigned int shader_program;

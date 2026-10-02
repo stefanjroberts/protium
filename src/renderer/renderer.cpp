@@ -1,7 +1,8 @@
 #include "renderer.h"
 #include "../core/file_io.h"
 
-float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+float vertices[] = {0.5f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f, -0.5f, 0.5f, 0.0f};
+unsigned int indices[] = {0,1,3, 1,2,3};
 
 // CALLBACK FUNCTIONS
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -20,6 +21,7 @@ void Renderer::init(GLFWwindow *window)
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     File vertex_shader_source("src/shaders/vert.glsl");
     File fragment_shader_source("src/shaders/frag.glsl");
@@ -81,6 +83,9 @@ void Renderer::init(GLFWwindow *window)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 }
@@ -92,5 +97,6 @@ void Renderer::render()
 
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glDrawElements(GL_TRIANGLES,6,  GL_UNSIGNED_INT, 0);
 }
