@@ -1,14 +1,18 @@
 #include "renderer.h"
 #include "../core/file_io.h"
 #include "math.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../extern/stb_image.h"
 
-float vertices1[] = {0.5, -0.75, 0.0, 0.5, -0.25, 0.0, -0.5, -0.5, 0.0};
+Vertex vertices1[] = {
+    {{-0.5, -0.5, 0.0}, {-1.0, -1.0}},
+    {{-0.5, 0.5, 0.0}, {-1.0, 1.0}},
+    {{0.5, -0.5, 0.0}, {1.0, -1.0}},
+    {{0.5, 0.5, 0.0},{1.0, 1.0}}
 
-unsigned int indices1[] = {0, 1, 2};
+};
 
-float vertices2[] = {-0.5, 0.25, 0.0, 0.5, 0.5, 0.0, -0.5, 0.75, 0.0};
-
-unsigned int indices2[] = {0, 1, 2};
+unsigned int indices1[] = {0, 1, 2, 1, 3, 2};
 
 // CALLBACK FUNCTIONS
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -62,6 +66,26 @@ ShaderProgram::ShaderProgram(const char *vertex_file_path, const char *fragment_
     glDeleteShader(fragment_shader);
 }
 
+void ShaderProgram::use()
+{
+    glUseProgram(ID);
+}
+
+Texture::Texture(const char *location)
+{
+    glGenTextures(1, &ID);
+    glBindTexture(GL_TEXTURE_2D, ID);
+    unsigned char *data = stbi_load(location, &width, &height, &channel_count, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
+}
+
+void Texture::bind()
+{
+    glBindTexture(GL_TEXTURE_2D, ID);
+}
+
 void Renderer::init(GLFWwindow *window)
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -74,14 +98,10 @@ void Renderer::init(GLFWwindow *window)
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
-    glGenBuffers(1, &VBO2);
-    glGenBuffers(1, &EBO2);
 
-    shader_program = new ShaderProgram("src/shaders/vert.glsl", "src/shaders/frag.glsl");
-    shader_program2 = new ShaderProgram("src/shaders/vert.glsl", "src/shaders/frag2.glsl");
+    shader_program = new ShaderProgram("shaders/vert.glsl", "shaders/frag.glsl");
 
     glGenVertexArrays(1, &VAO);
-    glGenVertexArrays(1, &VAO2);
 
     glBindVertexArray(VAO);
 
@@ -91,42 +111,22 @@ void Renderer::init(GLFWwindow *window)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices1), indices1, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
-    glBindVertexArray(VAO2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    counter = 0.0f;
-
-    color_uniform = glGetUniformLocation(shader_program->ID, "uniform_color");
-    color_uniform2 = glGetUniformLocation(shader_program2->ID, "uniform_color");
+    texture = new Texture("assets/container.jpg");
 }
 
 void Renderer::render()
 {
-    counter += 0.1f;
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shader_program->ID);
-    glUniform3f(color_uniform, 0.5f + 0.5 * sin(counter), 0.0f, 0.0f);
+    shader_program->use();
+    texture->bind();
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-
-    glUseProgram(shader_program2->ID);
-
-    glUniform3f(color_uniform2, 0.0f, 0.5f + 0.5 * sin(counter), 0.0f);
-    glBindVertexArray(VAO2);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

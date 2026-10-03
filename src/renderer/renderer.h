@@ -3,6 +3,12 @@
 #include "../extern/glad/glad.h"
 #include <GLFW/glfw3.h>
 
+struct Vertex
+{
+    float position[3];
+    float texture_coordinates[2];
+};
+
 class ShaderProgram
 {
   public:
@@ -11,24 +17,27 @@ class ShaderProgram
     void use();
 };
 
+class Texture
+{
+  private:
+    unsigned int ID;
+    int width;
+    int height;
+    int channel_count;
+
+  public:
+    Texture(const char *location);
+    void bind();
+};
+
 class Renderer
 {
   private:
     unsigned int EBO;
     unsigned int VBO;
     unsigned int VAO;
-    ShaderProgram* shader_program;
-
-    int color_uniform;
-
-    unsigned int EBO2;
-    unsigned int VBO2;
-    unsigned int VAO2;
-    ShaderProgram* shader_program2;
-
-    int color_uniform2;
-
-    float counter;
+    ShaderProgram *shader_program;
+    Texture *texture;
 
   public:
     void init(GLFWwindow *window);
