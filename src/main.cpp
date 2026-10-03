@@ -11,7 +11,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(1920, 1080, "Protium", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "Protium", nullptr, nullptr);
 
     if (window == nullptr)
     {

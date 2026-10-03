@@ -1,4 +1,107 @@
 {
 	"fileMacros": {},
-	"globalMacros": {}
+	"globalMacros": {},
+	"templates": [
+		{
+			"name": "Vert (opengl)",
+			"shaderStage": "vert",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Frag (opengl)",
+			"shaderStage": "frag",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Comp (opengl)",
+			"shaderStage": "comp",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Geom (opengl)",
+			"shaderStage": "geom",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Tesc (opengl)",
+			"shaderStage": "tesc",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Tese (opengl)",
+			"shaderStage": "tese",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Mesh (opengl)",
+			"shaderStage": "mesh",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Task (opengl)",
+			"shaderStage": "task",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Rgen (opengl)",
+			"shaderStage": "rgen",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Rahit (opengl)",
+			"shaderStage": "rahit",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Rchit (opengl)",
+			"shaderStage": "rchit",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Rmiss (opengl)",
+			"shaderStage": "rmiss",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Rint (opengl)",
+			"shaderStage": "rint",
+			"targetEnv": "opengl",
+			"version": "330"
+		},
+		{
+			"name": "Rcall (opengl)",
+			"shaderStage": "rcall",
+			"targetEnv": "opengl",
+			"version": "330"
+		}
+	],
+	"shaderConfigs": {
+		"src/shaders/frag.glsl": {
+			"shaderStage": "frag",
+			"version": "330",
+			"targetEnv": "opengl"
+		},
+		"src/shaders/vert.glsl": {
+			"shaderStage": "vert",
+			"version": "330",
+			"targetEnv": "opengl"
+		},
+		"src/shaders/frag2.glsl": {
+			"shaderStage": "frag",
+			"version": "330",
+			"targetEnv": "opengl"
+		}
+	}
 }
