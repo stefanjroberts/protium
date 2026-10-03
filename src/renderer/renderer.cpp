@@ -1,16 +1,13 @@
 #include "renderer.h"
 #include "../core/file_io.h"
-#include "math.h"
+#include <GLFW/glfw3.h>
+#include <glm/ext/matrix_transform.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include "../extern/stb_image.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <math.h>
 
-Vertex vertices1[] = {
-    {{-0.5, -0.5, 0.0}, {-1.0, -1.0}},
-    {{-0.5, 0.5, 0.0}, {-1.0, 1.0}},
-    {{0.5, -0.5, 0.0}, {1.0, -1.0}},
-    {{0.5, 0.5, 0.0},{1.0, 1.0}}
-
-};
+Vertex vertices1[] = {{{-0.5, -0.5, 4.0}, {0.0, 0.0}}, {{-0.5, 0.5, 4.0}, {0.0, 1.0}}, {{0.5, -0.5, 4.0}, {1.0, 0.0}}, {{0.5, 0.5, 4.0}, {1.0, 1.0}}};
 
 unsigned int indices1[] = {0, 1, 2, 1, 3, 2};
 
@@ -71,29 +68,35 @@ void ShaderProgram::use()
     glUseProgram(ID);
 }
 
-Texture::Texture(const char *location)
+Texture::Texture(const char *location, unsigned int type)
 {
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);
     unsigned char *data = stbi_load(location, &width, &height, &channel_count, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
 }
 
-void Texture::bind()
+void Texture::bind(unsigned int texture_index)
 {
+    glActiveTexture(texture_index);
     glBindTexture(GL_TEXTURE_2D, ID);
 }
 
-void Renderer::init(GLFWwindow *window)
+Renderer::Renderer(GLFWwindow *window)
 {
+    stbi_set_flip_vertically_on_load(true);
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         PROTIUM_ERROR("Failed to initialise GLAD");
     }
 
-    glViewport(0, 0, 1300, 1350);
+    glfwGetWindowSize(window, &screen_width, &screen_height);
+    aspect_ratio = ((float)screen_width) / ((float)screen_height);
+
+    glViewport(0, 0, screen_width, screen_height);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glGenBuffers(1, &VBO);
@@ -116,16 +119,39 @@ void Renderer::init(GLFWwindow *window)
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    texture = new Texture("assets/container.jpg");
+    texture = new Texture("assets/container.jpg", GL_RGB);
+
+    shader_program->use();
+
+    glUniform1i(glGetUniformLocation(shader_program->ID, "in_texture1"), 0);
+
+    init_transformations();
+
+    counter = 0.0f;
+}
+
+void Renderer::init_transformations()
+{
+    model = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    view = glm::lookAt(glm::vec3(0,0.0f,2.0f), glm::vec3(0,0,4.0f), glm::vec3(0.0f,1.0f,0));
+    projection = glm::perspective(90.0f, aspect_ratio, 0.1f, 10.0f);
 }
 
 void Renderer::render()
 {
+    counter += 0.02f;
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    view = glm::lookAt(glm::vec3(0,(sin(counter)*3.0f),2.0f), glm::vec3(0,0,4.0f), glm::vec3(0.0f,1.0f,0));
+
+    glm::mat4 camera = projection * view * model;
+
+    int camera_uniform = glGetUniformLocation(shader_program->ID, "camera");
+    glUniformMatrix4fv(camera_uniform, 1, GL_FALSE, (float *)&camera);
+
     shader_program->use();
-    texture->bind();
+    texture->bind(GL_TEXTURE0);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

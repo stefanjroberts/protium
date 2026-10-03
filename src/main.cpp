@@ -21,8 +21,7 @@ int main()
 
     glfwMakeContextCurrent(window);
 
-    Renderer *renderer = new Renderer;
-    renderer->init(window);
+    Renderer *renderer = new Renderer(window);
     InputHandler *input_handler = new InputHandler;
     input_handler->init(window);
 
