@@ -2,13 +2,15 @@
 #include "input.h"
 #include <GLFW/glfw3.h>
 
-glm::mat4 Camera::get_matrix(){
+glm::mat4 Camera::get_matrix()
+{
     glm::mat4 out;
     out = perspective * view;
     return out;
 }
 
-void Camera::move(Input input){
+void Camera::move(Input input)
+{
     camera_yaw += 0.2f * input.mouse_delta_x;
     camera_pitch -= 0.2f * input.mouse_delta_y;
 
@@ -38,16 +40,18 @@ void Camera::move(Input input){
     view = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0));
 }
 
-void Camera::update_perspective(float FOV, int width, int height){
-    
-    float aspect_ratio = (float) width / (float) height;
+void Camera::update_perspective(float FOV, int width, int height)
+{
+
+    float aspect_ratio = (float)width / (float)height;
     perspective = glm::perspective(FOV, aspect_ratio, near_plane, far_plane);
 }
 
-Camera::Camera(){
-        near_plane = 0.1f;
-        far_plane = 10.0f;
-        camera_yaw = 0.0f;
-        camera_pitch = 0.0f;
-        camera_position = glm::vec3(0,0,0); 
+Camera::Camera()
+{
+    near_plane = 0.1f;
+    far_plane = 10.0f;
+    camera_yaw = 0.0f;
+    camera_pitch = 0.0f;
+    camera_position = glm::vec3(0, 0, 0);
 }

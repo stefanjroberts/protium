@@ -25,7 +25,8 @@ float vertices1[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f,
                      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
                      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
 
-unsigned int indices1[36];
+unsigned int indices1[36] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17,
+                             18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
 
 ShaderProgram::ShaderProgram(const char *vertex_file_path, const char *fragment_file_path)
 {
@@ -94,13 +95,79 @@ void Texture::bind(unsigned int texture_index)
     glBindTexture(GL_TEXTURE_2D, ID);
 }
 
+Model::Model(Vertex *vertices, size_t in_vertex_count, unsigned int *indices, size_t in_index_count, Texture *in_texture)
+{
+    vertex_count = in_vertex_count;
+    index_count = in_index_count;
+    tex = in_texture;
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * in_vertex_count, vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * in_index_count, indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    model_matrix = glm::mat4(1.0f);
+    model_matrix = glm::translate(model_matrix, glm::vec3(0,0,0));
+
+}
+
+void Model::draw(Camera *camera, int PVM_uniform)
+{
+
+    model_matrix = glm::rotate(model_matrix, 0.05f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 4.0f));
+    glm::mat4 PVM = camera->get_matrix() * model_matrix;
+    glUniformMatrix4fv(PVM_uniform, 1, GL_FALSE, (float *)&PVM);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
+}
+
+RenderModule::RenderModule(const char *vertex_file_path, const char *fragment_file_path, int in_max_model_count)
+{
+    shader_program = new ShaderProgram(vertex_file_path, fragment_file_path);
+    models = new Model *[in_max_model_count];
+    max_model_count = in_max_model_count;
+    model_count = 0;
+}
+
+void RenderModule::addmodel(Model *model)
+{
+    if (model_count == max_model_count)
+    {
+        PROTIUM_ERROR("Tried to add too many models to Render Module");
+    }
+    else
+    {
+        models[model_count] = model;
+        model_count += 1;
+    }
+}
+
+void RenderModule::render(Camera *camera)
+{
+    shader_program->use();
+    int PVM_uniform = glGetUniformLocation(shader_program->ID, "PVM_matrix");
+    for (int i = 0; i < model_count; i++)
+    {
+
+        models[i]->draw(camera, PVM_uniform);
+    }
+}
+
 Renderer::Renderer(GLFWwindow *window)
 {
-    for (int i = 0; i < 36; i++)
-    {
-        indices1[i] = i;
-    }
-
     stbi_set_flip_vertically_on_load(true);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -110,60 +177,26 @@ Renderer::Renderer(GLFWwindow *window)
 
     int screen_width;
     int screen_height;
-
     glfwGetWindowSize(window, &screen_width, &screen_height);
-
     glViewport(0, 0, screen_width, screen_height);
-
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    shader_program = new ShaderProgram("shaders/vert.glsl", "shaders/frag.glsl");
-
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices1), indices1, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
 
     texture = new Texture("assets/container.jpg", GL_RGB);
 
-    shader_program->use();
-
-    glUniform1i(glGetUniformLocation(shader_program->ID, "in_texture1"), 0);
-
-    model = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-
-    counter = 0.0f;
-
     glEnable(GL_DEPTH_TEST);
+
+    Vertex *vertex_data = (Vertex *)vertices1;
+
+    Model *light = new Model(vertex_data, 36, indices1, 36, texture);
+
+    light_render_module = new RenderModule("shaders/vert.glsl", "shaders/frag.glsl", 1);
+
+    light_render_module->addmodel(light);
 }
 
 void Renderer::render(Camera *camera)
 {
-    counter += 0.02f;
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    model = glm::rotate(model, 0.01f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 4.0f));
-
-    glm::mat4 PVM = camera->get_matrix() * model;
-
-    int PVM_uniform = glGetUniformLocation(shader_program->ID, "PVM_matrix");
-    glUniformMatrix4fv(PVM_uniform, 1, GL_FALSE, (float *)&PVM);
-
-    shader_program->use();
-    texture->bind(GL_TEXTURE0);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    light_render_module->render(camera);
 }
