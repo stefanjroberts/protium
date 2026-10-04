@@ -88,17 +88,12 @@
 		}
 	],
 	"shaderConfigs": {
-		"src/shaders/frag.glsl": {
-			"shaderStage": "frag",
-			"version": "330",
-			"targetEnv": "opengl"
-		},
-		"src/shaders/vert.glsl": {
+		"build/shaders/vert.glsl": {
 			"shaderStage": "vert",
 			"version": "330",
 			"targetEnv": "opengl"
 		},
-		"src/shaders/frag2.glsl": {
+		"build/shaders/frag.glsl": {
 			"shaderStage": "frag",
 			"version": "330",
 			"targetEnv": "opengl"

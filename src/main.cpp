@@ -1,7 +1,10 @@
+#include "core/file_io.cpp"
 #include "core/input.cpp"
 #include "core/logger.cpp"
-#include "core/file_io.cpp"
 #include "renderer/renderer.cpp"
+#include <GLFW/glfw3.h>
+
+
 
 int main()
 {
@@ -13,6 +16,8 @@ int main()
 
     GLFWwindow *window = glfwCreateWindow(800, 600, "Protium", nullptr, nullptr);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     if (window == nullptr)
     {
         PROTIUM_ERROR("Failed to create GLFW window");
@@ -22,8 +27,7 @@ int main()
     glfwMakeContextCurrent(window);
 
     Renderer *renderer = new Renderer(window);
-    InputHandler *input_handler = new InputHandler;
-    input_handler->init(window);
+    InputHandler *input_handler = new InputHandler(window);
 
     PROTIUM_INFO("Entering main Loop");
 
@@ -37,14 +41,12 @@ int main()
         {
             running = false;
         }
-
         input_handler->process_input();
-        if (input_handler->input.w)
+        if (input_handler->input.esc == true)
         {
-            PROTIUM_INFO("W");
+            glfwSetWindowShouldClose(window, true);
         }
-
-        renderer->render();
+        renderer->render(input_handler->input);
         glfwSwapBuffers(window);
     }
 

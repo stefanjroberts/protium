@@ -1,4 +1,5 @@
 #pragma once
+#include "../core/input.h"
 #include "../core/logger.h"
 #include "../extern/glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -41,9 +42,11 @@ class Renderer
     int screen_height;
     float aspect_ratio;
 
-    float FOV_radians = 0.8; // NOTE: This is not the full FOV, it is half the FOV, i.e. the angle between the center of the screen and the edge.
-    float near_face = 0.1f;
-    float far_face = 10.0f;
+    glm::vec3 camera_position;
+    float camera_yaw;
+    float camera_pitch;
+
+    float movement_speed = 0.01f;
 
     glm::mat4 model;
     glm::mat4 view;
@@ -59,5 +62,5 @@ class Renderer
   public:
     Renderer(GLFWwindow *window);
     void init_transformations();
-    void render();
+    void render(Input input);
 };
