@@ -236,6 +236,7 @@ void Renderer::render(Camera *camera)
 
     box_render_module->set_uniform3f("light_position", light_position);
     box_render_module->set_uniform4m("model_matrix", box_matrix);
+    box_render_module->set_uniform3f("camera_position", camera->get_position());
 
     light_render_module->render(camera);
     box_render_module->render(camera);

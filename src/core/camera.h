@@ -19,4 +19,5 @@ class Camera
     glm::mat4 get_matrix();
     void update_perspective(float FOV, int width, int height);
     void move(Input input);
+    glm::vec3 get_position();
 };

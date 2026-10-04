@@ -47,6 +47,11 @@ void Camera::update_perspective(float FOV, int width, int height)
     perspective = glm::perspective(FOV, aspect_ratio, near_plane, far_plane);
 }
 
+glm::vec3 Camera::get_position()
+{
+    return camera_position;
+}
+
 Camera::Camera()
 {
     near_plane = 0.1f;
