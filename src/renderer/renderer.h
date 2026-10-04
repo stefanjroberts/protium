@@ -1,4 +1,5 @@
 #pragma once
+#include "../core/camera.h"
 #include "../core/input.h"
 #include "../core/logger.h"
 #include "../extern/glad/glad.h"
@@ -38,10 +39,6 @@ class Renderer
   private:
     float counter;
 
-    int screen_width;
-    int screen_height;
-    float aspect_ratio;
-
     glm::vec3 camera_position;
     float camera_yaw;
     float camera_pitch;
@@ -61,6 +58,5 @@ class Renderer
 
   public:
     Renderer(GLFWwindow *window);
-    void init_transformations();
-    void render(Input input);
+    void render(Camera* camera);
 };

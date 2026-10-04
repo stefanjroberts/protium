@@ -1,10 +1,19 @@
 #include "core/file_io.cpp"
 #include "core/input.cpp"
 #include "core/logger.cpp"
+#include "core/camera.cpp"
 #include "renderer/renderer.cpp"
 #include <GLFW/glfw3.h>
 
+bool screen_size_changed = true;
+int screen_size[2] = {100, 100}; // TODO: Remove Globals
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+    screen_size[0] = width;
+    screen_size[1] = height;
+    glViewport(0, 0, width, height);
+}
 
 int main()
 {
@@ -26,8 +35,11 @@ int main()
 
     glfwMakeContextCurrent(window);
 
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
     Renderer *renderer = new Renderer(window);
     InputHandler *input_handler = new InputHandler(window);
+    Camera *camera = new Camera;
 
     PROTIUM_INFO("Entering main Loop");
 
@@ -46,7 +58,13 @@ int main()
         {
             glfwSetWindowShouldClose(window, true);
         }
-        renderer->render(input_handler->input);
+        if (screen_size_changed)
+        {
+            camera->update_perspective(1.0, screen_size[0], screen_size[1]);
+            screen_size_changed = false;
+        }
+        camera->move(input_handler->input);
+        renderer->render(camera);
         glfwSwapBuffers(window);
     }
 
