@@ -204,7 +204,7 @@ void Renderer::render(Camera *camera)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 light_matrix =
-        glm::translate(glm::rotate(glm::mat4(1.0f), counter * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0, 0, 1));
+        glm::scale(glm::translate(glm::rotate(glm::mat4(1.0f), counter * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0, 0, 1)), glm::vec3(0.2f));
     light_model->update_matrix(light_matrix);
     glm::mat4 box_matrix =
         glm::translate(glm::rotate(glm::mat4(1.0f), counter * glm::radians(-50.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0, 0, -1));

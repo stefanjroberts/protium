@@ -10,6 +10,7 @@ int screen_size[2] = {100, 100}; // TODO: Remove Globals
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
+    screen_size_changed = true;
     screen_size[0] = width;
     screen_size[1] = height;
     glViewport(0, 0, width, height);
