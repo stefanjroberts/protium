@@ -119,19 +119,21 @@ Model::Model(Vertex *vertices, size_t in_vertex_count, unsigned int *indices, si
     glEnableVertexAttribArray(1);
 
     model_matrix = glm::mat4(1.0f);
-    model_matrix = glm::translate(model_matrix, glm::vec3(0,0,0));
-
 }
 
 void Model::draw(Camera *camera, int PVM_uniform)
 {
 
-    model_matrix = glm::rotate(model_matrix, 0.05f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 4.0f));
     glm::mat4 PVM = camera->get_matrix() * model_matrix;
     glUniformMatrix4fv(PVM_uniform, 1, GL_FALSE, (float *)&PVM);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
+}
+
+void Model::update_matrix(glm::mat4 matrix)
+{
+    model_matrix = matrix;
 }
 
 RenderModule::RenderModule(const char *vertex_file_path, const char *fragment_file_path, int in_max_model_count)
@@ -186,17 +188,27 @@ Renderer::Renderer(GLFWwindow *window)
 
     Vertex *vertex_data = (Vertex *)vertices1;
 
-    Model *light = new Model(vertex_data, 36, indices1, 36, texture);
-
+    light_model = new Model(vertex_data, 36, indices1, 36, texture);
     light_render_module = new RenderModule("shaders/vert.glsl", "shaders/frag.glsl", 1);
+    light_render_module->addmodel(light_model);
 
-    light_render_module->addmodel(light);
+    box_model = new Model(vertex_data, 36, indices1, 36, texture);
+    box_render_module = new RenderModule("shaders/vert.glsl", "shaders/frag.glsl", 1);
+    box_render_module->addmodel(box_model);
 }
 
 void Renderer::render(Camera *camera)
 {
+    counter += 0.01f;
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glm::mat4 light_matrix =
+        glm::translate(glm::rotate(glm::mat4(1.0f), counter * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0, 0, 1));
+    light_model->update_matrix(light_matrix);
+    glm::mat4 box_matrix =
+        glm::translate(glm::rotate(glm::mat4(1.0f), counter * glm::radians(-50.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0, 0, -1));
+    box_model->update_matrix(box_matrix);
     light_render_module->render(camera);
+    box_render_module->render(camera);
 }

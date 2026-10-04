@@ -71,16 +71,13 @@ class Renderer
 {
   private:
     float counter;
-    glm::mat4 model;
 
     RenderModule* light_render_module;
-
-    unsigned int EBO;
-    unsigned int VBO;
-    unsigned int VAO;
-    ShaderProgram *shader_program;
+    RenderModule* box_render_module;
+    Model* light_model;
+    Model* box_model;
+    
     Texture *texture;
-    Texture *texture2;
 
   public:
     Renderer(GLFWwindow *window);
