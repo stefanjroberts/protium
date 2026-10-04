@@ -97,6 +97,11 @@
 			"shaderStage": "frag",
 			"version": "330",
 			"targetEnv": "opengl"
+		},
+		"build/shaders/frag_light.glsl": {
+			"shaderStage": "frag",
+			"version": "330",
+			"targetEnv": "opengl"
 		}
 	}
 }

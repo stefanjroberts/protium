@@ -11,6 +11,7 @@ struct Vertex
 {
     float position[3];
     float texture_coordinates[2];
+    float normal[3];
 };
 
 class ShaderProgram
@@ -40,7 +41,7 @@ class Model
     unsigned int VBO;
     unsigned int EBO;
     glm::mat4 model_matrix;
-    Texture* tex;
+    Texture *tex;
     size_t vertex_count;
     size_t index_count;
 
@@ -48,14 +49,14 @@ class Model
     int *indices;
 
   public:
-    Model(Vertex* vertices, size_t in_vertex_count, unsigned int * indices, size_t in_index_count, Texture* in_texture);
-    void draw(Camera* camera, int PVM_unifrom);
+    Model(Vertex *vertices, size_t in_vertex_count, unsigned int *indices, size_t in_index_count, Texture *in_texture);
+    void draw(Camera *camera, int PVM_unifrom);
     void update_matrix(glm::mat4 matrix);
 };
 
 class RenderModule
 {
-  private:
+  public:
     ShaderProgram *shader_program;
     Model **models;
     int max_model_count;
@@ -64,19 +65,22 @@ class RenderModule
   public:
     RenderModule(const char *vertex_file_path, const char *fragment_file_path, int model_count);
     void addmodel(Model *model);
-    void render(Camera* camera);
+    void render(Camera *camera);
+    void set_uniform3f(const char *name, glm::vec3 value);
+    void set_uniform4m(const char* name, glm::mat4 value);
 };
 
 class Renderer
 {
   private:
     float counter;
+    glm::vec3 light_position = glm::vec3(1.2f, 2.0f, 2.0f);
 
-    RenderModule* light_render_module;
-    RenderModule* box_render_module;
-    Model* light_model;
-    Model* box_model;
-    
+    RenderModule *light_render_module;
+    RenderModule *box_render_module;
+    Model *light_model;
+    Model *box_model;
+
     Texture *texture;
 
   public:
