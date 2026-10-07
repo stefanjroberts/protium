@@ -1,8 +1,8 @@
 #pragma once
-#include "../core/camera.h"
 #include "../core/input.h"
 #include "../core/logger.h"
 #include "../extern/glad/glad.h"
+#include "camera.h"
 #include <GLFW/glfw3.h>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/glm.hpp>
@@ -12,6 +12,19 @@ struct Vertex
     float position[3];
     float texture_coordinates[2];
     float normal[3];
+};
+
+struct Material
+{
+    bool in_use;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
+
+    Material(){
+      in_use = true;
+    }
 };
 
 class ShaderProgram
@@ -37,11 +50,13 @@ class Texture
 
 class Model
 {
+  private:
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
     glm::mat4 model_matrix;
     Texture *tex;
+    Material material = {};
     size_t vertex_count;
     size_t index_count;
 
@@ -50,8 +65,9 @@ class Model
 
   public:
     Model(Vertex *vertices, size_t in_vertex_count, unsigned int *indices, size_t in_index_count, Texture *in_texture);
-    void draw(Camera *camera, int PVM_unifrom);
+    void draw(Camera *camera, int PVM_unifrom, ShaderProgram* shader);
     void update_matrix(glm::mat4 matrix);
+    void set_material(Material in_material);
 };
 
 class RenderModule
@@ -67,7 +83,7 @@ class RenderModule
     void addmodel(Model *model);
     void render(Camera *camera);
     void set_uniform3f(const char *name, glm::vec3 value);
-    void set_uniform4m(const char* name, glm::mat4 value);
+    void set_uniform4m(const char *name, glm::mat4 value);
 };
 
 class Renderer

@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "input.h"
 #include <GLFW/glfw3.h>
 
 glm::mat4 Camera::get_matrix()

@@ -1,7 +1,7 @@
 #include "core/file_io.cpp"
 #include "core/input.cpp"
 #include "core/logger.cpp"
-#include "core/camera.cpp"
+#include "renderer/camera.cpp"
 #include "renderer/renderer.cpp"
 #include <GLFW/glfw3.h>
 

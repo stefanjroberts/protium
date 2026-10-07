@@ -129,10 +129,26 @@ Model::Model(Vertex *vertices, size_t in_vertex_count, unsigned int *indices, si
     model_matrix = glm::mat4(1.0f);
 }
 
-void Model::draw(Camera *camera, int PVM_uniform)
+void Model::draw(Camera *camera, int PVM_uniform, ShaderProgram *shader)
 {
 
     glm::mat4 PVM = camera->get_matrix() * model_matrix;
+
+    if (material.in_use)
+    {
+        glUniform3f(glGetUniformLocation(shader->ID, "material.ambient"), material.ambient.x, material.ambient.y, material.ambient.z);
+        glUniform3f(glGetUniformLocation(shader->ID, "material.diffuse"), material.diffuse.x, material.diffuse.y, material.diffuse.z);
+        glUniform3f(glGetUniformLocation(shader->ID, "material.specular"), material.specular.x, material.specular.y, material.specular.z);
+        glUniform1f(glGetUniformLocation(shader->ID, "material.shininess"), material.shininess);
+    }
+    else
+    {
+        glUniform3f(glGetUniformLocation(shader->ID, "material.ambient"), 0.1f, 0.1f, 0.1f);
+        glUniform3f(glGetUniformLocation(shader->ID, "material.diffuse"), 0.8f, 0.8f, 0.8f);
+        glUniform3f(glGetUniformLocation(shader->ID, "material.specular"), 1.0f, 1.0f, 1.0f);
+        glUniform1f(glGetUniformLocation(shader->ID, "material.shininess"), 32.0f);
+    }
+
     glUniformMatrix4fv(PVM_uniform, 1, GL_FALSE, (float *)&PVM);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -142,6 +158,12 @@ void Model::draw(Camera *camera, int PVM_uniform)
 void Model::update_matrix(glm::mat4 matrix)
 {
     model_matrix = matrix;
+}
+
+void Model::set_material(Material in_material)
+{
+    material = in_material;
+    material.in_use = true;
 }
 
 RenderModule::RenderModule(const char *vertex_file_path, const char *fragment_file_path, int in_max_model_count)
@@ -171,7 +193,7 @@ void RenderModule::render(Camera *camera)
     int PVM_uniform = glGetUniformLocation(shader_program->ID, "PVM_matrix");
     for (int i = 0; i < model_count; i++)
     {
-        models[i]->draw(camera, PVM_uniform);
+        models[i]->draw(camera, PVM_uniform, this->shader_program);
     }
 }
 
@@ -186,7 +208,7 @@ void RenderModule::set_uniform4m(const char *name, glm::mat4 value)
 {
     glUseProgram(shader_program->ID);
     int programID = glGetUniformLocation(shader_program->ID, name);
-    glUniformMatrix4fv(programID, 1, GL_FALSE, (float*)&value);
+    glUniformMatrix4fv(programID, 1, GL_FALSE, (float *)&value);
 }
 
 Renderer::Renderer(GLFWwindow *window)
@@ -209,14 +231,24 @@ Renderer::Renderer(GLFWwindow *window)
 
     Vertex *vertex_data = (Vertex *)vertices1;
 
+    glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 0.0f);
+
     light_model = new Model(vertex_data, 36, indices1, 36, texture);
     light_render_module = new RenderModule("shaders/vert.glsl", "shaders/frag_light.glsl", 1);
     light_render_module->addmodel(light_model);
+    light_render_module->set_uniform3f("light_color", light_color);
+
+    Material material;
+    material.ambient = {0.1, 0.1, 0.1};
+    material.diffuse = {0.6, 0.6, 0.6};
+    material.specular = {0.8, 0.8, 0.8};
+    material.shininess = 128.0f;
 
     box_model = new Model(vertex_data, 36, indices1, 36, texture);
+    box_model->set_material(material);
     box_render_module = new RenderModule("shaders/vert.glsl", "shaders/frag.glsl", 1);
     box_render_module->addmodel(box_model);
-    box_render_module->set_uniform3f("light", glm::vec3(1.0f, 1.0f, 0.8f));
+    box_render_module->set_uniform3f("light_data.color", light_color);
 }
 
 void Renderer::render(Camera *camera)
@@ -234,9 +266,13 @@ void Renderer::render(Camera *camera)
         glm::translate(glm::rotate(glm::mat4(1.0f), counter * glm::radians(-50.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0, 0, -1));
     box_model->update_matrix(box_matrix);
 
-    box_render_module->set_uniform3f("light_position", light_position);
+    box_render_module->set_uniform3f("light_data.position", light_position);
     box_render_module->set_uniform4m("model_matrix", box_matrix);
     box_render_module->set_uniform3f("camera_position", camera->get_position());
+
+    glm::vec3 light_color = glm::vec3(cos(counter), 1.0f, sin(counter));
+    light_render_module->set_uniform3f("light_color", light_color);
+    box_render_module->set_uniform3f("light_data.color", light_color);
 
     light_render_module->render(camera);
     box_render_module->render(camera);
